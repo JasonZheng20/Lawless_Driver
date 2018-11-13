@@ -1,10 +1,12 @@
 import Car
 import sys
+import math as math
 FREE = 0
 BUILDING = 1
 CAR = 2
 TEMP_CAR = 3
 CRASH = 4
+DESTINATION_MARKER = 5
 CRASH_TIMER = 8
 class Environment():
 	def __init__(self,num_cars, grid = None, width = 10, height = 10):
@@ -126,7 +128,28 @@ class Environment():
 	def get_states(self):
 		states = []
 		for car in self.cars:
-			states.append([])
+			state = []
+			pos = car.position()
+			x = pos[0]
+			y = pos[1]
+			dest = car.get_destination()
+			vel = car.get_velocity()
+			x_dest = dest[0]
+			y_dest = dest[1]
+			dist = (x_dest-x,y_dest-y)
+			state.append(vel)
+			state.append(dist)
+			view = []
+			for i in range(x-4,x+5):
+
+				view.append([])
+				for j in range(y-4,y+5):
+					if(i < 0 or j < 0 or i >= self.height or j >= self.width):
+						view.append(1)
+					else:
+						view.append(self.map[i][j])
+			state.append(view)
+			states.append(state)
 		return states
 
 def main():
