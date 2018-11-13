@@ -141,11 +141,12 @@ class Environment():
 			state.append(dist)
 			view = []
 			for i in range(x-4,x+5):
-
 				view.append([])
 				for j in range(y-4,y+5):
 					if(i < 0 or j < 0 or i >= self.height or j >= self.width):
 						view.append(1)
+					elif(i == x_dest and j == y_dest):
+						view.append(DESTINATION_MARKER)
 					else:
 						view.append(self.map[i][j])
 			state.append(view)
