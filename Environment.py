@@ -136,7 +136,7 @@ class Environment():
 			vel = car.get_velocity()
 			x_dest = dest[0]
 			y_dest = dest[1]
-			dist = (x_dest-x,y_dest-y)
+			dist = (max(-10,min(x_dest-x,10)),max(-10,min(y_dest-y,10)))
 			state.append(vel)
 			state.append(dist)
 			view = []
