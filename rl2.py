@@ -31,6 +31,7 @@ def choose_action(env, score_crash, score_goal):
     action_space = [0, 1, 2, 3, 4]
     action = np.random.choice(action_space)
     return action
+    # TODO: create a heuristic for each agent based on their current location and end goal
 
 
 # Idea: Train using K-logit model where you only train one car at a time and
