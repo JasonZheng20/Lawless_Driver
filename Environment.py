@@ -1,6 +1,7 @@
 import Car
 import sys
 import math as math
+
 FREE = 0
 BUILDING = 1
 CAR = 2
@@ -8,6 +9,8 @@ TEMP_CAR = 3
 CRASH = 4
 DESTINATION_MARKER = 5
 CRASH_TIMER = 8
+# ANY non 1 2 3 4 action is no action
+
 class Environment():
 	def __init__(self,num_cars, grid = None, width = 10, height = 10):
 		if(grid != None):
@@ -21,6 +24,7 @@ class Environment():
 		self.height = height
 		self.width = width
 		self.cars = []
+		self.active_cars = num_cars
 		self.crashed_cars = {}
 		for i in range(num_cars):
 			temp = Car.Car(5+i*5,5,(10,10))
@@ -67,7 +71,7 @@ class Environment():
 					if(time == 0):
 						self.map[i][j] = FREE
 					else:
-						self.crashed_cars[(i,j)] = time-1 
+						self.crashed_cars[(i,j)] = time-1
 
 	def assign_act(self, actions):
 		for i in range(len(self.cars)):
@@ -90,6 +94,7 @@ class Environment():
 		for pos in path:
 			x = pos[0]
 			y = pos[1]
+			print "X AND Y: " + str(x) + ", " + str(y) #BUG HERE IF ITS NOT IN MAP RANGE, try 3+ agents
 			val = self.map[x][y]
 			if(val != FREE):
 				if(val == CAR or val == TEMP_CAR):
@@ -101,6 +106,10 @@ class Environment():
 				if(val != BUILDING):
 					self.crashed_cars[pos] = CRASH_TIMER
 					self.map[x][y] = CRASH
+				self.active_cars -= 1
+				# elif (val == BUILDING):
+				# 	self.crashed_cars[pos]
+				# print "CRASHED CARS: " + str(self.crashed_cars)
 				return True
 		x = new_pos[0]
 		y = new_pos[1]
@@ -111,6 +120,7 @@ class Environment():
 				car.crash()
 				final_pos = car.position
 				self.map[final_pos[0]][final_pos[1]] = FREE
+			print "CRASHED CARS: " + str(self.crashed_cars)
 			return True
 		return False
 
@@ -177,15 +187,17 @@ def main():
 		raise Exception("usage: python environment.py height width num_cars\nor\npython environment.py grid_file num_cars")
 
 	while(True):
+	# for i in xrange(2):
 		actions = []
 		for i in range(num_cars):
 			actions.append(int(input("car " + str(i) + " action: ")))
-		print(actions)
+		# print("mom" + str(actions))
 		env.tick(actions)
+		print env.active_cars
+		if not env.active_cars:
+			print 'all crashed!'
+			break
 
 
 if __name__ == '__main__':
     main()
-
-
-
