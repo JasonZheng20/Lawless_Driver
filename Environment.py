@@ -1,4 +1,4 @@
-import Car
+import car as Car
 import sys
 import math as math
 
@@ -27,7 +27,7 @@ class Environment():
 		self.active_cars = num_cars
 		self.crashed_cars = {}
 		for i in range(num_cars):
-			temp = Car.Car(5+i*5,5,(10,10))
+			temp = Car.car(5+i*5,5,(10,10))
 			self.cars.append(temp)
 		self.print_map()
 
@@ -81,10 +81,10 @@ class Environment():
 	def perform_act(self):
 		for i in range(len(self.cars)):
 			car = self.cars[i]
-			if(car.is_crashed() or car.is_done):
+			if(car.is_crashed() or car.is_done()):
 				continue
 			path, new_pos = car.tick()
-
+			print(path)
 			if(self.check_crash(path,new_pos)):
 				car.crash()
 			else:
@@ -118,7 +118,7 @@ class Environment():
 			if(val == CAR or val == TEMP_CAR):
 				car = self.cars[self.car_locations[(pos)]]
 				car.crash()
-				final_pos = car.position
+				final_pos = car.position()
 				self.map[final_pos[0]][final_pos[1]] = FREE
 			print "CRASHED CARS: " + str(self.crashed_cars)
 			return True
