@@ -195,7 +195,7 @@ def main():
 		env.tick(actions)
 		print env.active_cars
 		if not env.active_cars:
-			print 'all crashed!'
+			print 'All crashed!'
 			break
 
 
