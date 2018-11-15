@@ -4,8 +4,8 @@
 # v2.0 -- using James Liljenwall's state framework
 #==============================================================================#
 import sys
-import tensorflow as tf
-from tensorflow import keras
+# import tensorflow as tf
+# from tensorflow import keras
 from Environment import Environment
 import numpy as np
 import matplotlib.pyplot as plt
@@ -55,8 +55,7 @@ def max_Q(s, Q):
     return 0
 
 
-def learn_update(Q, s, s_, a):
-    r = 1 #TODO CHANGE
+def learn_update(Q, s, s_, a, r):
     #TODO receive a r value if CRASH
     if s in Q:
         if a in Q[s]:
@@ -85,7 +84,7 @@ def q_learn(num_agents, num_simulations, env):
     learning_rate = 0.5
     episode = 0
     while episode < num_simulations:
-        env.reset_map() #TODO: replace with hard-reset function
+        env.hard_reset()
         num_steps = 0
         while(True):
             actions = []
@@ -95,8 +94,11 @@ def q_learn(num_agents, num_simulations, env):
                 actions.append(action)
     		env.tick(actions)
             states_ = env.get_states()
+            rewards = env.get_rewards()
             for i in xrange(num_agents):
-                learn_update(Q, str(states[i]), str(states_[i]), actions[i])
+                if rewards[i] > 0:
+                    print 'pOSITIVE REWARD!'
+                learn_update(Q, str(states[i]), str(states_[i]), actions[i], rewards[i])
             num_steps += 1
             print "Currently on step #" + str(num_steps)
             if not env.active_cars:
