@@ -121,7 +121,7 @@ class Environment():
 		for pos in path:
 			x = pos[0]
 			y = pos[1]
-			print "X AND Y: " + str(x) + ", " + str(y) #BUG HERE IF ITS NOT IN MAP RANGE, try 3+ agents
+			# print "X AND Y: " + str(x) + ", " + str(y) #BUG HERE IF ITS NOT IN MAP RANGE, try 3+ agents
 			val = self.map[x][y]
 			if(val != FREE):
 				if(val == CAR or val == TEMP_CAR):
@@ -222,7 +222,7 @@ def main():
 		env.tick(actions)
 		print env.active_cars
 		if not env.active_cars:
-			print 'all crashed!'
+			print 'All crashed!'
 			break
 
 
