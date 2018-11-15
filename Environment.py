@@ -50,11 +50,13 @@ class Environment():
 			while(self.map[x][y] != FREE or (x,y) in start_locations):
 				x = int(rand.random()*self.height)
 				y = int(rand.random()*self.width)
+			start_locations[(x,y)] = 0
 			end_x = int(rand.random()*self.height)
 			end_y = int(rand.random()*self.width)
 			while(self.map[end_x][end_y] != FREE or (end_x,end_y) in end_locations):
 				end_x = int(rand.random()*self.height)
 				end_y = int(rand.random()*self.width)
+			end_locations[(end_x,end_y)] = 0
 			temp = Car.car(x,y,(end_x,end_y))
 			self.cars.append(temp)
 
