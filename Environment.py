@@ -95,6 +95,12 @@ class Environment():
 		self.perform_act()
 		self.print_map()
 		self.reset_map()
+		active = 0
+		for i in range(self.num_cars):
+			car = self.cars[i]
+			if(not(car.is_done() or car.is_crashed())):
+				active += 1
+		self.active_cars = active
 		# self.print_map()
 
 
