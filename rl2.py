@@ -6,12 +6,14 @@
 import sys
 import tensorflow as tf
 from tensorflow import keras
-from environment import Environment
+from Environment import Environment
 import numpy as np
 import matplotlib.pyplot as plt
 
 score_crash = -6 #TODO: correlate with real life times
 score_goal = 1 #TODO: correlate with real life times/income measures
+learning_rate = 0.5
+discount_factor = 0.95
 #==============================================================================#
 # Utilities
 #==============================================================================#
@@ -30,11 +32,47 @@ def create_map(file_name, grid, num_cars):
 # Reinforcement learning
 #==============================================================================#
 # Choose an action based on the observable state space
-def choose_action(env, score_crash, score_goal):
-    action_space = [0, 1, 2, 3, 4]
-    action = np.random.choice(action_space)
-    return action
+def choose_action(Q, s, score_crash, score_goal):
+    exp_arr = dict()
+    lambda_v = 1
+    actions = [0, 1, 2, 3, 4]
+    for action in actions:
+        u = 1
+        if s in Q and action in Q[s]:
+            u = Q[s][action]
+        exp_arr[action] = np.exp(lambda_v * np.log(u))
+    denominator = sum(exp_arr.values())
+    for action in actions:
+        exp_arr[action] /= denominator
+    a = np.random.choice(exp_arr.keys(), p = exp_arr.values())
+    return a
     # TODO: create a heuristic for each agent based on their current location and end goal
+
+
+def max_Q(s, Q):
+    if s in Q and Q[s]:
+        return max(Q[s].values())
+    return 0
+
+
+def learn_update(Q, s, s_, a):
+    r = 1 #TODO CHANGE
+    if s in Q:
+        if a in Q[s]:
+            change = learning_rate * (r + discount_factor *  max_Q(s_, Q) - Q[s][a])
+            Q[s][a] += change
+            return change
+        else:
+            change = learning_rate * (r + discount_factor *  max_Q(s_, Q))
+            if change != 0:
+                Q[s][a] = change
+            return change
+    else:
+        Q[s] = dict()
+        change = learning_rate * (r + discount_factor *  max_Q(s_, Q))
+        if change != 0:
+            Q[s][a] = change
+        return change
 
 
 # Idea: Train using K-logit model where you only train one car at a time and
@@ -46,23 +84,25 @@ def q_learn(num_agents, num_simulations, env):
     learning_rate = 0.5
     episode = 0
     while episode < num_simulations:
+        env.reset_map() #TODO: replace with hard-reset function
         num_steps = 0
         while(True):
             actions = []
+            states = env.get_states()
             for i in xrange(num_agents):
-                action = choose_action(env, score_crash, score_goal)
+                action = choose_action(Q, str(states[i]), score_crash, score_goal)
                 actions.append(action)
     		env.tick(actions)
-            # for i in xrange(num_cars):
-            #     # current_car_action = actions[i]
-            #     state_, reward = observe_update(env)
-            #     learn_update(Q, state_, reward, actions[i], env)
+            states_ = env.get_states()
+            for i in xrange(num_agents):
+                learn_update(Q, str(states[i]), str(states_[i]), actions[i])
             num_steps += 1
-            print num_steps
+            print "Currently on step #" + str(num_steps)
             if not env.active_cars:
                 print 'All Crashed or Terminated'
                 break
         episode += 1
+    print Q
 
 
 def t_sampling(num_agents, num_simulations, env):
