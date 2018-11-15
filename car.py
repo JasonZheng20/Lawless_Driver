@@ -11,6 +11,10 @@ class car():
 		self.velocity.append(0)
 		self.crashed = False
 		self.done = False
+		self.ticks = 0
+
+	def get_ticks(self):
+		return self.ticks
 
 	def is_crashed(self):
 		return self.crashed
@@ -45,6 +49,7 @@ class car():
 			self.velocity[1] = max(-1*MAX_VELOCITY, self.velocity[1]-1)
 
 	def tick(self):
+		self.ticks += 1
 		print self.velocity
 		new_x = self.x + self.velocity[0]
 		new_y = self.y + self.velocity[1]

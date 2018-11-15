@@ -1,6 +1,8 @@
 import car as Car
 import sys
 import math as math
+import random as rand
+import numpy as np
 
 FREE = 0
 BUILDING = 1
@@ -9,6 +11,7 @@ TEMP_CAR = 3
 CRASH = 4
 DESTINATION_MARKER = 5
 CRASH_TIMER = 8
+REWARD_VAL = 10000
 # ANY non 1 2 3 4 action is no action
 
 class Environment():
@@ -23,13 +26,40 @@ class Environment():
 	def other_init(self, height, width, num_cars):
 		self.height = height
 		self.width = width
-		self.cars = []
 		self.active_cars = num_cars
+		self.num_cars = num_cars
 		self.crashed_cars = {}
-		for i in range(num_cars):
-			temp = Car.car(5+i*5,5,(10,10))
-			self.cars.append(temp)
+		self.assign_cars()
 		self.print_map()
+		self.finished_cars = {}
+
+	def hard_reset(self):
+		for i in range(self.height):
+			for j in range(self.width):
+				val = self.map[i][j]
+				if(val == CAR or val == TEMP_CAR or val == CRASH):
+					self.map[i][j] = FREE
+
+	def assign_cars(self):
+		self.cars = []
+		start_locations = {}
+		end_locations = {}
+		for i in range(self.num_cars):
+			x = int(rand.random()*self.height)
+			y = int(rand.random()*self.width)
+			while(self.map[x][y] != FREE or (x,y) in start_locations):
+				x = int(rand.random()*self.height)
+				y = int(rand.random()*self.width)
+			end_x = int(rand.random()*self.height)
+			end_y = int(rand.random()*self.width)
+			while(self.map[end_x][end_y] != FREE or (end_x,end_y) in end_locations):
+				end_x = int(rand.random()*self.height)
+				end_y = int(rand.random()*self.width)
+			temp = Car.car(x,y,(end_x,end_y))
+			self.cars.append(temp)
+
+
+
 
 	def generate_map(self, width, height):
 		self.width = width
@@ -162,6 +192,31 @@ class Environment():
 			state.append(view)
 			states.append(state)
 		return states
+
+	def get_rewards(self, end = False):
+		rewards = []
+		for i in range(self.num_cars):
+			if(i in self.finished_cars):
+				rewards.append(0)
+				continue
+			car = self.cars[i]
+			rew = 0
+			if(car.is_done()):
+				rew = REWARD_VAL *(1.0+ 1.0/(1+np.exp(car.get_ticks()/8)))
+				self.finished_cars[i] = 0
+			elif(car.is_crashed()):
+				rew = -1 * REWARD_VAL *(1.0+ 1.0/(1+np.exp(car.get_ticks()/8))) 
+				self.finished_cars[i] = 0
+			elif(end):
+				pos = car.position()
+				dest = car.get_destination()
+				distance = math.sqrt((pos[0]-dest[0])**2 + (pos[0]-dest[0])**2)
+				rew = (REWARD_VAL/10.0) *(1.0/(1+np.exp(distance/8)))
+			rewards.append(rew)
+		return rewards
+
+
+
 
 def main():
 	env = None
