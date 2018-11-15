@@ -32,7 +32,7 @@ def create_map(file_name, grid, num_cars):
 # Reinforcement learning
 #==============================================================================#
 # Choose an action based on the observable state space
-def choose_action(Q, s, score_crash, score_goal):
+def softmax(Q, s, score_crash, score_goal):
     exp_arr = dict()
     lambda_v = 1
     actions = [0, 1, 2, 3, 4]
@@ -57,6 +57,7 @@ def max_Q(s, Q):
 
 def learn_update(Q, s, s_, a):
     r = 1 #TODO CHANGE
+    #TODO receive a r value if CRASH
     if s in Q:
         if a in Q[s]:
             change = learning_rate * (r + discount_factor *  max_Q(s_, Q) - Q[s][a])
@@ -90,7 +91,7 @@ def q_learn(num_agents, num_simulations, env):
             actions = []
             states = env.get_states()
             for i in xrange(num_agents):
-                action = choose_action(Q, str(states[i]), score_crash, score_goal)
+                action = softmax(Q, str(states[i]), score_crash, score_goal)
                 actions.append(action)
     		env.tick(actions)
             states_ = env.get_states()
@@ -105,7 +106,7 @@ def q_learn(num_agents, num_simulations, env):
     print Q
 
 
-def t_sampling(num_agents, num_simulations, env):
+def dq_network(num_agents, num_simulations, env):
     pass
 
 #==============================================================================#
@@ -122,8 +123,8 @@ def main():
     env = create_map(map_name, grid, num_agents)
     if simulation_type == 'ql':
         q_learn(num_agents, num_simulations, env)
-    # elif simulation_type == 'dqn':
-    #     dq_network(num_agents, num_simulations, env)
+    elif simulation_type == 'dqn':
+        dq_network(num_agents, num_simulations, env)
 
 
 if __name__ == '__main__':
