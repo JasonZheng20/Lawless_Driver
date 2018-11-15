@@ -1,6 +1,7 @@
 import car as Car
 import sys
 import math as math
+import random as rand
 
 FREE = 0
 BUILDING = 1
@@ -23,13 +24,39 @@ class Environment():
 	def other_init(self, height, width, num_cars):
 		self.height = height
 		self.width = width
-		self.cars = []
 		self.active_cars = num_cars
+		self.num_cars = num_cars
 		self.crashed_cars = {}
-		for i in range(num_cars):
-			temp = Car.car(5+i*5,5,(10,10))
-			self.cars.append(temp)
+		self.assign_cars()
 		self.print_map()
+
+	def hard_reset(self):
+		for i in range(self.height):
+			for j in range(self.width):
+				val = self.map[i][j]
+				if(val == CAR or val == TEMP_CAR or val == CRASH):
+					self.map[i][j] = FREE
+
+	def assign_cars(self):
+		self.cars = []
+		start_locations = {}
+		end_locations = {}
+		for i in range(self.num_cars):
+			x = int(rand.random()*self.height)
+			y = int(rand.random()*self.width)
+			while(self.map[x][y] != FREE or (x,y) in start_locations):
+				x = int(rand.random()*self.height)
+				y = int(rand.random()*self.width)
+			end_x = int(rand.random()*self.height)
+			end_y = int(rand.random()*self.width)
+			while(self.map[end_x][end_y] != FREE or (end_x,end_y) in end_locations):
+				end_x = int(rand.random()*self.height)
+				end_y = int(rand.random()*self.width)
+			temp = Car.car(x,y,(end_x,end_y))
+			self.cars.append(temp)
+
+
+
 
 	def generate_map(self, width, height):
 		self.width = width
