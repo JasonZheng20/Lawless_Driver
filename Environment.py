@@ -39,6 +39,12 @@ class Environment():
 				val = self.map[i][j]
 				if(val == CAR or val == TEMP_CAR or val == CRASH):
 					self.map[i][j] = FREE
+		self.active_cars = self.num_cars
+		self.crashed_cars = {}
+		self.assign_cars()
+		self.print_map()
+		self.finished_cars = {}
+
 
 	def assign_cars(self):
 		self.cars = []
@@ -207,7 +213,7 @@ class Environment():
 				rew = REWARD_VAL *(1.0+ 1.0/(1+np.exp(car.get_ticks()/8)))
 				self.finished_cars[i] = 0
 			elif(car.is_crashed()):
-				rew = -1 * REWARD_VAL *(1.0+ 1.0/(1+np.exp(car.get_ticks()/8))) 
+				rew = -1 * REWARD_VAL *(1.0+ 1.0/(1+np.exp(car.get_ticks()/8)))
 				self.finished_cars[i] = 0
 			elif(end):
 				pos = car.position()

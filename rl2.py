@@ -4,8 +4,8 @@
 # v2.0 -- using James Liljenwall's state framework
 #==============================================================================#
 import sys
-import tensorflow as tf
-from tensorflow import keras
+# import tensorflow as tf
+# from tensorflow import keras
 from Environment import Environment
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,7 +32,7 @@ def create_map(file_name, grid, num_cars):
 # Reinforcement learning
 #==============================================================================#
 # Choose an action based on the observable state space
-def choose_action(Q, s, score_crash, score_goal):
+def softmax(Q, s, score_crash, score_goal):
     exp_arr = dict()
     lambda_v = 1
     actions = [0, 1, 2, 3, 4]
@@ -55,8 +55,8 @@ def max_Q(s, Q):
     return 0
 
 
-def learn_update(Q, s, s_, a):
-    r = 1 #TODO CHANGE
+def learn_update(Q, s, s_, a, r):
+    #TODO receive a r value if CRASH
     if s in Q:
         if a in Q[s]:
             change = learning_rate * (r + discount_factor *  max_Q(s_, Q) - Q[s][a])
@@ -84,18 +84,21 @@ def q_learn(num_agents, num_simulations, env):
     learning_rate = 0.5
     episode = 0
     while episode < num_simulations:
-        env.reset_map() #TODO: replace with hard-reset function
+        env.hard_reset()
         num_steps = 0
         while(True):
             actions = []
             states = env.get_states()
             for i in xrange(num_agents):
-                action = choose_action(Q, str(states[i]), score_crash, score_goal)
+                action = softmax(Q, str(states[i]), score_crash, score_goal)
                 actions.append(action)
     		env.tick(actions)
             states_ = env.get_states()
+            rewards = env.get_rewards()
             for i in xrange(num_agents):
-                learn_update(Q, str(states[i]), str(states_[i]), actions[i])
+                if rewards[i] > 0:
+                    print 'pOSITIVE REWARD!'
+                learn_update(Q, str(states[i]), str(states_[i]), actions[i], rewards[i])
             num_steps += 1
             print "Currently on step #" + str(num_steps)
             if not env.active_cars:
@@ -105,7 +108,7 @@ def q_learn(num_agents, num_simulations, env):
     print Q
 
 
-def t_sampling(num_agents, num_simulations, env):
+def dq_network(num_agents, num_simulations, env):
     pass
 
 #==============================================================================#
@@ -122,9 +125,15 @@ def main():
     env = create_map(map_name, grid, num_agents)
     if simulation_type == 'ql':
         q_learn(num_agents, num_simulations, env)
-    # elif simulation_type == 'dqn':
-    #     dq_network(num_agents, num_simulations, env)
+    elif simulation_type == 'dqn':
+        dq_network(num_agents, num_simulations, env)
 
 
 if __name__ == '__main__':
     main()
+
+#==============================================================================#
+# TODOS
+#==============================================================================#
+# Count features in maps
+# DQN
