@@ -50,7 +50,7 @@ class car():
 
 	def tick(self):
 		self.ticks += 1
-		print self.velocity
+		# print self.velocity
 		new_x = self.x + self.velocity[0]
 		new_y = self.y + self.velocity[1]
 		new_pos = (new_x,new_y)
@@ -64,6 +64,7 @@ class car():
 			path_x+=change_x
 			path_y+=change_y
 		if(new_pos == self.destination and self.velocity[0] == 0 and self.velocity[1] == 0):
+			print("I'm done")
 			self.done = True
 		self.x = new_x
 		self.y = new_y

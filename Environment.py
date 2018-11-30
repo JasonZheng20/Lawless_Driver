@@ -30,7 +30,7 @@ class Environment():
 		self.num_cars = num_cars
 		self.crashed_cars = {}
 		self.assign_cars()
-		self.print_map()
+		# self.print_map()
 		self.finished_cars = {}
 
 	def hard_reset(self):
@@ -42,7 +42,7 @@ class Environment():
 		self.active_cars = self.num_cars
 		self.crashed_cars = {}
 		self.assign_cars()
-		self.print_map()
+		# self.print_map()
 		self.finished_cars = {}
 
 
@@ -67,7 +67,11 @@ class Environment():
 			self.cars.append(temp)
 
 
-
+	def is_done(self):
+		for car in self.cars:
+			if(not (car.is_done() or car.is_crashed())):
+				return False
+		return True
 
 	def generate_map(self, width, height):
 		self.width = width
@@ -93,7 +97,7 @@ class Environment():
 					self.map[i][j] = FREE
 		self.assign_act(actions)
 		self.perform_act()
-		self.print_map()
+		# self.print_map()
 		self.reset_map()
 		active = 0
 		for i in range(self.num_cars):
@@ -101,7 +105,6 @@ class Environment():
 			if(not(car.is_done() or car.is_crashed())):
 				active += 1
 		self.active_cars = active
-		# self.print_map()
 
 
 	#remove all of the cars from the map and update the crashed cars
@@ -128,7 +131,6 @@ class Environment():
 			if(car.is_crashed() or car.is_done()):
 				continue
 			path, new_pos = car.tick()
-			print(path)
 			if(self.check_crash(path,new_pos)):
 				car.crash()
 			else:
@@ -138,14 +140,12 @@ class Environment():
 		for pos in path:
 			x = pos[0]
 			y = pos[1]
-			# print "X AND Y: " + str(x) + ", " + str(y) #BUG HERE IF ITS NOT IN MAP RANGE, try 3+ agents
 			val = self.map[x][y]
 			if(val != FREE):
 				if(val == CAR or val == TEMP_CAR):
 					car = self.cars[self.car_locations[pos]]
 					car.crash()
 					final_pos = car.position()
-					print(final_pos)
 					self.map[final_pos[0]][final_pos[1]] = FREE
 				if(val != BUILDING):
 					self.crashed_cars[pos] = CRASH_TIMER
@@ -153,7 +153,6 @@ class Environment():
 				self.active_cars -= 1
 				# elif (val == BUILDING):
 				# 	self.crashed_cars[pos]
-				# print "CRASHED CARS: " + str(self.crashed_cars)
 				return True
 		x = new_pos[0]
 		y = new_pos[1]
@@ -164,7 +163,6 @@ class Environment():
 				car.crash()
 				final_pos = car.position()
 				self.map[final_pos[0]][final_pos[1]] = FREE
-			print "CRASHED CARS: " + str(self.crashed_cars)
 			return True
 		return False
 
@@ -193,6 +191,10 @@ class Environment():
 			dist = (max(-10,min(x_dest-x,10)),max(-10,min(y_dest-y,10)))
 			state.append(vel)
 			state.append(dist)
+			if(car.is_crashed()):
+				state.append(0)
+			else:
+				state.append(1)
 			view = []
 			for i in range(x-4,x+5):
 				view.append([])
@@ -204,7 +206,7 @@ class Environment():
 					else:
 						view.append(self.map[i][j])
 			state.append(view)
-			states.append(state)
+			states.append(str(state))
 		return states
 
 	def get_rewards(self, end = False):
